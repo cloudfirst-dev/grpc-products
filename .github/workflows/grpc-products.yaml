@@ -16,6 +16,6 @@ jobs:
           -Dquarkus.container-image.build=true \
           -Dnative \
           -Dquarkus.native.container-build=true \
-          -Dquarkus.container-image.username= ${{ secrets.DOCKER_USERNAME }} \
-          -Dquarkus.container-image.password= ${{ secrets.DOCKER_PASSWORD }} \
+          -Dquarkus.container-image.username=${{ secrets.DOCKER_USERNAME }} \
+          -Dquarkus.container-image.password=${{ secrets.DOCKER_PASSWORD }} \
           -Dquarkus.container-image.push=true
