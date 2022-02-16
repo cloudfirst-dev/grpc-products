@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opa-conf
+type: Opaque
+stringData:
+  opa.yaml: |
+    labels:
+      system-id: {{ .Values.das.systemId }}
+      system-type: custom
+    services:
+    - credentials:
+        bearer:
+          token: {{ .Values.das.authToken }}
+      name: styra
+      url: https://{{ .Values.das.tenant }}.styra.com/v1
+    bundle:
+      name: /systems/{{ .Values.das.systemId }}
+      polling:
+        max_delay_seconds: 15
+        min_delay_seconds: 10
+      service: styra
+    decision_logs:
+      reporting:
+        max_delay_seconds: 15
+        min_delay_seconds: 10
+        upload_size_limit_bytes: 131072
+      service: styra
+    default_decision: rules/main
+    plugins:
+      envoy_ext_authz_grpc:
+        addr: :9191
+        path: rules/main
+        dry-run: false
+        enable-reflection: false
+    status:
+      service: styra

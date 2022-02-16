@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-products
+  labels:
+    app: grpc-products
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-products
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: grpc-products
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: grpc-products
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.grpc.repository }}:{{ .Values.image.grpc.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: opa
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.opa.repository }}:{{ .Values.image.opa.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - run
+            - --server
+            - --config-file=/opa-conf/opa.yaml
+            - --log-level=debug
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8181
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8181
+          volumeMounts:
+            - name: opa-conf
+              mountPath: "/opa-conf"
+              readOnly: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: envoy
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.envoy.repository }}:{{ .Values.image.envoy.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /healthy
+          #     port: 8080
+          # readinessProbe:
+          #   httpGet:
+          #     path: /healthy
+          #     port: 8080
+          volumeMounts:
+            - name: envoy-conf
+              mountPath: "/etc/envoy"
+              readOnly: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+      - name: opa-conf
+        secret:
+          secretName: opa-conf
+      - name: envoy-conf
+        configMap:
+          name: envoy-conf
