@@ -1,0 +1,25 @@
+version: '3'
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.16-latest
+    ports:
+      - "9901:9901"
+      - "51051:51051"
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+  opa-envoy:
+    image: openpolicyagent/opa:latest-envoy
+    ports:
+      - "9191:9191"
+    command:
+      - run
+      - --server
+      - --config-file=/opa.yaml
+      - --log-level=debug
+    volumes:
+      - ./testsrv.pb:/testsrv.pb
+      - ./opa.yaml:/opa.yaml
+  grpc-products:
+    image: quay.io/cloudfirst/grpc-products:1.0.0-SNAPSHOT
+    ports:
+      - "9000:9000"

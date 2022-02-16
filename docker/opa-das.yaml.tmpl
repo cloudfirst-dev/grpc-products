@@ -1,0 +1,30 @@
+labels:
+  system-id: ${DAS_SYSTEM_ID}
+  system-type: custom
+services:
+- credentials:
+    bearer:
+      token: ${DAS_AUTH_TOKEN}
+  name: styra
+  url: https://${DAS_TENANT}.styra.com/v1
+bundle:
+  name: /systems/${DAS_SYSTEM_ID}
+  polling:
+    max_delay_seconds: 15
+    min_delay_seconds: 10
+  service: styra
+decision_logs:
+  reporting:
+    max_delay_seconds: 15
+    min_delay_seconds: 10
+    upload_size_limit_bytes: 131072
+  service: styra
+default_decision: rules/main
+plugins:
+  envoy_ext_authz_grpc:
+    addr: :9191
+    path: rules/main
+    dry-run: false
+    enable-reflection: false
+status:
+  service: styra
