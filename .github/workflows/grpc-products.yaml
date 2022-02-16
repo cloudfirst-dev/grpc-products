@@ -11,4 +11,3 @@ jobs:
         uses: maxday/quarkus-native-build-docker-action@13bf5c4ae6942143cf43a5663a6c7f847ac3163c
         with:
           outputName: grpc-products-runner
-          dockerfilePath: src/main/docker/Dockerfile.native
